@@ -116,7 +116,7 @@ class SnakesAndLaddersGame {
         this.pipeStories.clear();
         this.pipePositions.clear(); // Clear previous pipe positions
 
-        const occupiedSquares = new Set([1, 100]); // Don't put pipes on start/end squares
+        const occupiedSquares = new Set([1, 100]); // Don't put pipes on start square (cell 1 - player starting position) or end square (cell 100)
         const minDistance = 3; // Reduced minimum distance for better placement success
         
         // Row tracking sets to ensure unique start/end rows per pipe type
@@ -266,16 +266,24 @@ class SnakesAndLaddersGame {
                 let sourceMin, sourceMax;
                 if (attempts < 200) {
                     // First 200 attempts: prefer lower-edge areas (lower squares)
-                    sourceMin = 2; sourceMax = 30;
+                    // Start at 3 to avoid cell 1 (player starting position)
+                    sourceMin = 3; sourceMax = 30;
                 } else if (attempts < 350) {
                     // Next 150 attempts: prefer middle-edge areas  
                     sourceMin = 31; sourceMax = 55;
                 } else {
                     // Final attempts: use full range (must be at most row 8 to have room to go up)
-                    sourceMin = 2; sourceMax = 80;
+                    // Start at 3 to avoid cell 1 (player starting position)
+                    sourceMin = 3; sourceMax = 80;
                 }
 
                 source = Math.floor(Math.random() * (sourceMax - sourceMin + 1)) + sourceMin;
+                
+                // Explicit safety check: never allow ladder to start from cell 1 (player starting position)
+                if (source === 1) {
+                    attempts++;
+                    continue;
+                }
 
                 // Calculate source row (0-based from bottom: row 0 = squares 1-10, row 1 = squares 11-20, etc.)
                 const sourceRow = Math.floor((source - 1) / 10);
@@ -412,6 +420,15 @@ class SnakesAndLaddersGame {
                 console.log(`Ladder: ${start} (row ${startRow}) → ${destination} (row ${destRow})`);
             }
         });
+        
+        // SAFETY VERIFICATION: Ensure no ladders start from cell 1 (player starting position)
+        const ladderFromCell1 = Array.from(this.pipes.entries()).find(([start, dest]) => start === 1 && dest > start);
+        if (ladderFromCell1) {
+            console.error('❌ CRITICAL ERROR: Ladder found starting from cell 1!', ladderFromCell1);
+            throw new Error('Game integrity violation: Ladder cannot start from cell 1 where players begin');
+        } else {
+            console.log('✅ Cell 1 protection verified: No ladders start from player starting position');
+        }
     }
 
     generatePipesWithRelaxedConstraints(targetSnakes, targetLadders, currentSnakes, currentLadders, occupiedSquares, usedNegativeStatements, usedPositiveStatements, usedSnakeStartRows, usedSnakeEndRows, usedLadderStartRows, usedLadderEndRows) {
@@ -464,7 +481,10 @@ class SnakesAndLaddersGame {
 
         // Try to add more ladders if needed
         while (actualLadders < 8 && usedPositiveStatements.length < this.positiveStatements.length) {
-            for (let source = 5; source < 80 && actualLadders < targetLadders; source += 5) {
+            for (let source = 6; source < 80 && actualLadders < targetLadders; source += 5) {
+                // Explicit safety check: never allow ladder to start from cell 1 (player starting position)
+                if (source === 1) continue;
+                
                 // Ensure destination is in a higher row
                 const sourceRow = Math.floor((source - 1) / 10);
                 // Skip if source row is already used
@@ -570,7 +590,7 @@ class SnakesAndLaddersGame {
     setupPlayers(playerNames) {
         this.players = playerNames.map(name => ({
             name: name,
-            position: 0
+            position: 1  // Players start at cell 1 (traditional Snakes and Ladders)
         }));
     }
 
@@ -1360,12 +1380,11 @@ class SnakesAndLaddersGame {
 
         // Determine current leader (highest position)
         const leaderPosition = Math.max(...this.players.map(p => p.position));
-        const leaders = this.players.filter(p => p.position === leaderPosition && p.position > 0);
+        const leaders = this.players.filter(p => p.position === leaderPosition);
         const isMultipleLeaders = leaders.length > 1;
 
         this.players.forEach((player, index) => {
-            // Only render tokens for players who are on the board (position > 0)
-            if (player.position > 0) {
+            // Render tokens for all players (all are now on the board at position ≥ 1)
                 const squareElement = document.getElementById(`square-${player.position}`);
                 if (!squareElement) return;
 
@@ -1383,7 +1402,7 @@ class SnakesAndLaddersGame {
                 tokenElement.className = `player-token player-${index + 1}`;
                 
                 // Add crown to current leader (only if there's a single leader)
-                const isLeader = player.position === leaderPosition && !isMultipleLeaders && player.position > 0;
+                const isLeader = player.position === leaderPosition && !isMultipleLeaders;
                 if (isLeader) {
                     tokenElement.classList.add('leader');
                 }
@@ -1411,7 +1430,6 @@ class SnakesAndLaddersGame {
                 }
 
                 squareElement.appendChild(tokenElement);
-            }
         });
         
         // After all tokens are rendered, show arrow for current player
@@ -1422,11 +1440,11 @@ class SnakesAndLaddersGame {
         // Only show arrow after the first player has completed their turn AND when not animating
         if (!this.gameActuallyStarted || this.isAnimating) return;
         
-        // Only show arrow for players who are on the board (position > 0)
+        // Check for valid game state
         if (this.players.length === 0) return;
         
         const currentPlayer = this.players[this.currentPlayerIndex];
-        if (!currentPlayer || currentPlayer.position === 0) return;
+        if (!currentPlayer) return;
         
         // Player is on the board
         const targetElement = document.getElementById(`square-${currentPlayer.position}`);
@@ -1715,11 +1733,11 @@ class SnakesAndLaddersGame {
         
         // Determine current leader (highest position)
         const leaderPosition = Math.max(...this.players.map(p => p.position));
-        const leaders = this.players.filter(p => p.position === leaderPosition && p.position > 0);
+        const leaders = this.players.filter(p => p.position === leaderPosition);
         const isMultipleLeaders = leaders.length > 1;
         
         // Add crown to current leader (only if there's a single leader)
-        const isLeader = player.position === leaderPosition && !isMultipleLeaders && player.position > 0;
+        const isLeader = player.position === leaderPosition && !isMultipleLeaders;
         if (isLeader) {
             tokenElement.classList.add('leader');
         }

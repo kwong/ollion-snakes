@@ -5,13 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snakes and Ladders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
     <div id="app">
         <div id="welcome-screen" class="screen active">
-            <h1>Cloud Ascension</h1>
+            <div class="title-wrapper">
+                <h1 class="glitch-title" data-text="Cloud Ascension">Cloud Ascension</h1>
+                <div class="scanlines"></div>
+            </div>
             <div id="game-instructions">
                 <button id="toggle-instructions" aria-expanded="false" aria-controls="instructions-content">Show
                     Instructions</button>
