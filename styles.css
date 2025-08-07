@@ -1,0 +1,1248 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000000;
+    color: white;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+}
+
+#app {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+#game-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    gap: 20px;
+}
+
+#game-screen.active {
+    display: flex;
+    flex-direction: column;
+}
+
+#welcome-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+#welcome-screen.active {
+    display: flex;
+}
+
+#win-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+#win-screen.active {
+    display: flex;
+}
+
+#welcome-screen h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    color: #00CED1;
+}
+
+#player-setup {
+    background-color: #333;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 0 auto;
+    max-width: 400px;
+}
+
+#player-setup label {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+#player-setup input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    background-color: #555;
+    color: white;
+    border: 1px solid #777;
+    border-radius: 5px;
+}
+
+#player-names {
+    margin: 1rem 0;
+}
+
+.player-name-input {
+    display: block;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #555;
+    color: white;
+    border: 1px solid #777;
+    border-radius: 5px;
+}
+
+#start-game,
+#roll-dice,
+#new-game {
+    background-color: #00CED1;
+    color: #000;
+    border: none;
+    padding: 1.2rem 2.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: all 0.3s;
+    min-height: 50px;
+    min-width: 140px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#start-game:hover,
+#roll-dice:hover,
+#new-game:hover {
+    background-color: #20B2AA;
+    transform: translateY(-2px);
+}
+
+#roll-dice:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+
+#roll-dice:disabled:hover {
+    background-color: #666;
+    transform: none;
+}
+
+#game-board {
+    width: min(calc(100vw - 40px), calc(100vh - 180px));
+    height: min(calc(100vw - 40px), calc(100vh - 180px));
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 1px;
+    background-color: #000;
+    border: 2px solid #333;
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1000px) {
+    #game-board {
+        width: min(calc(100vw - 40px), calc(100vh - 200px));
+        height: min(calc(100vw - 40px), calc(100vh - 200px));
+    }
+
+    #game-controls {
+        min-width: 280px;
+        padding: 1.2rem 2rem;
+        gap: 1.5rem;
+    }
+
+    #dice-display {
+        width: 80px;
+        height: 80px;
+        font-size: 2.2rem;
+    }
+
+    .player-token {
+        font-size: 0.66rem;
+    }
+    
+    .square-number {
+        font-size: clamp(0.42rem, 0.84vw, 0.72rem);
+    }
+    
+    .square-content {
+        font-size: clamp(0.3rem, 0.66vw, 0.84rem);
+    }
+}
+
+@media (max-width: 768px) {
+    #game-screen {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    #game-board {
+        width: min(calc(100vw - 30px), calc(100vh - 220px));
+        height: min(calc(100vw - 30px), calc(100vh - 220px));
+    }
+
+    #game-controls {
+        flex-direction: column;
+        min-width: 240px;
+        padding: 1rem 1.5rem;
+        gap: 1rem;
+    }
+
+    #current-player {
+        font-size: 1.2rem;
+    }
+
+    #dice-display {
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
+    }
+
+    #start-game,
+    #roll-dice,
+    #new-game {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        min-height: 45px;
+        min-width: 120px;
+    }
+
+    .player-token {
+        font-size: 0.6rem;
+    }
+    
+    .square-number {
+        font-size: clamp(0.36rem, 0.72vw, 0.6rem);
+    }
+    
+    .square-content {
+        font-size: clamp(0.24rem, 0.6vw, 0.72rem);
+    }
+}
+
+@media (max-width: 480px) {
+    #game-screen {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    #game-board {
+        width: min(calc(100vw - 20px), calc(100vh - 240px));
+        height: min(calc(100vw - 20px), calc(100vh - 240px));
+    }
+
+    #game-controls {
+        flex-direction: column;
+        min-width: 200px;
+        padding: 0.8rem 1rem;
+        gap: 0.8rem;
+    }
+
+    #dice-display {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+    }
+
+    .player-token {
+        font-size: 0.54rem;
+    }
+    
+    .square-number {
+        font-size: clamp(0.3rem, 0.6vw, 0.48rem);
+    }
+    
+    .square-content {
+        font-size: clamp(0.18rem, 0.48vw, 0.6rem);
+    }
+}
+
+.square {
+    background-color: #000;
+    border: 1px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    color: white;
+    padding: 0;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.square-number {
+    position: absolute;
+    top: clamp(1px, 0.5vw, 3px);
+    left: clamp(1px, 0.5vw, 3px);
+    font-size: clamp(0.48rem, 0.96vw, 0.84rem);
+    font-weight: bold;
+    line-height: 1;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.square-content {
+    font-size: clamp(0.36rem, 0.72vw, 0.96rem);
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.1;
+    padding: clamp(2px, 0.5vw, 4px);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    z-index: 2;
+    max-width: 90%;
+    max-height: 85%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.square::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Right arrow (default) */
+.square::before {
+    border-left: 20px solid #888;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+}
+
+/* Left arrow */
+.square.arrow-left::before {
+    border-right: 20px solid #888;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-left: none;
+}
+
+/* Up arrow */
+.square.arrow-up::before {
+    border-bottom: 20px solid #888;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: none;
+}
+
+/* Down arrow */
+.square.arrow-down::before {
+    border-top: 20px solid #888;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: none;
+}
+
+/* Cloud adoption story squares - no default highlighting */
+.square.positive-cause {
+    background-color: #000;
+    /* Same as regular squares */
+    border: 1px solid white;
+    /* Same as regular squares */
+    font-size: 0.75rem;
+    color: #ffffff;
+    font-weight: bold;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.square.positive-effect {
+    background-color: #000;
+    /* Same as regular squares */
+    border: 1px solid white;
+    /* Same as regular squares */
+    font-size: 0.75rem;
+    color: #ffffff;
+    font-weight: bold;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.square.negative-cause {
+    background-color: #000;
+    /* Same as regular squares */
+    border: 1px solid white;
+    /* Same as regular squares */
+    font-size: 0.75rem;
+    color: #ffffff;
+    font-weight: bold;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.square.negative-effect {
+    background-color: #000;
+    /* Same as regular squares */
+    border: 1px solid white;
+    /* Same as regular squares */
+    font-size: 0.75rem;
+    color: #ffffff;
+    font-weight: bold;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Destination square highlighting - only for pipe endpoints */
+.square.pipe-destination.snake {
+    border: 3px solid rgba(255, 68, 68, 0.8);
+    box-shadow: 0 0 12px rgba(255, 68, 68, 0.5);
+    animation: pulse-red 2s infinite ease-in-out;
+}
+
+.square.pipe-destination.ladder {
+    border: 3px solid rgba(0, 206, 209, 0.8);
+    box-shadow: 0 0 12px rgba(0, 206, 209, 0.5);
+    animation: pulse-teal 2s infinite ease-in-out;
+}
+
+@keyframes pulse-red {
+
+    0%,
+    100% {
+        border-color: rgba(255, 68, 68, 0.8);
+        box-shadow: 0 0 12px rgba(255, 68, 68, 0.5);
+    }
+
+    50% {
+        border-color: rgba(255, 68, 68, 1);
+        box-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+    }
+}
+
+@keyframes pulse-teal {
+
+    0%,
+    100% {
+        border-color: rgba(0, 206, 209, 0.8);
+        box-shadow: 0 0 12px rgba(0, 206, 209, 0.5);
+    }
+
+    50% {
+        border-color: rgba(0, 206, 209, 1);
+        box-shadow: 0 0 20px rgba(0, 206, 209, 0.8);
+    }
+}
+
+/* Educational message overlay */
+.educational-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.story-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.educational-message.positive .story-content {
+    border: 4px solid #4CAF50;
+    background: linear-gradient(135deg, #E8F5E8, #F1F8E9);
+}
+
+.educational-message.negative .story-content {
+    border: 4px solid #F44336;
+    background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+}
+
+.story-content h3 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.story-content p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.4;
+}
+
+.close-message {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.close-message:hover {
+    background-color: #1976D2;
+    transform: translateY(-2px);
+}
+
+/* CSS Grid positioning for serpentine layout - Generated rules */
+/* Bottom row (1-10): left to right */
+#square-1 {
+    grid-area: 10 / 1;
+}
+
+#square-2 {
+    grid-area: 10 / 2;
+}
+
+#square-3 {
+    grid-area: 10 / 3;
+}
+
+#square-4 {
+    grid-area: 10 / 4;
+}
+
+#square-5 {
+    grid-area: 10 / 5;
+}
+
+#square-6 {
+    grid-area: 10 / 6;
+}
+
+#square-7 {
+    grid-area: 10 / 7;
+}
+
+#square-8 {
+    grid-area: 10 / 8;
+}
+
+#square-9 {
+    grid-area: 10 / 9;
+}
+
+#square-10 {
+    grid-area: 10 / 10;
+}
+
+/* Row 9 (11-20): right to left */
+#square-11 {
+    grid-area: 9 / 10;
+}
+
+#square-12 {
+    grid-area: 9 / 9;
+}
+
+#square-13 {
+    grid-area: 9 / 8;
+}
+
+#square-14 {
+    grid-area: 9 / 7;
+}
+
+#square-15 {
+    grid-area: 9 / 6;
+}
+
+#square-16 {
+    grid-area: 9 / 5;
+}
+
+#square-17 {
+    grid-area: 9 / 4;
+}
+
+#square-18 {
+    grid-area: 9 / 3;
+}
+
+#square-19 {
+    grid-area: 9 / 2;
+}
+
+#square-20 {
+    grid-area: 9 / 1;
+}
+
+/* Row 8 (21-30): left to right */
+#square-21 {
+    grid-area: 8 / 1;
+}
+
+#square-22 {
+    grid-area: 8 / 2;
+}
+
+#square-23 {
+    grid-area: 8 / 3;
+}
+
+#square-24 {
+    grid-area: 8 / 4;
+}
+
+#square-25 {
+    grid-area: 8 / 5;
+}
+
+#square-26 {
+    grid-area: 8 / 6;
+}
+
+#square-27 {
+    grid-area: 8 / 7;
+}
+
+#square-28 {
+    grid-area: 8 / 8;
+}
+
+#square-29 {
+    grid-area: 8 / 9;
+}
+
+#square-30 {
+    grid-area: 8 / 10;
+}
+
+/* Row 7 (31-40): right to left */
+#square-31 {
+    grid-area: 7 / 10;
+}
+
+#square-32 {
+    grid-area: 7 / 9;
+}
+
+#square-33 {
+    grid-area: 7 / 8;
+}
+
+#square-34 {
+    grid-area: 7 / 7;
+}
+
+#square-35 {
+    grid-area: 7 / 6;
+}
+
+#square-36 {
+    grid-area: 7 / 5;
+}
+
+#square-37 {
+    grid-area: 7 / 4;
+}
+
+#square-38 {
+    grid-area: 7 / 3;
+}
+
+#square-39 {
+    grid-area: 7 / 2;
+}
+
+#square-40 {
+    grid-area: 7 / 1;
+}
+
+/* Row 6 (41-50): left to right */
+#square-41 {
+    grid-area: 6 / 1;
+}
+
+#square-42 {
+    grid-area: 6 / 2;
+}
+
+#square-43 {
+    grid-area: 6 / 3;
+}
+
+#square-44 {
+    grid-area: 6 / 4;
+}
+
+#square-45 {
+    grid-area: 6 / 5;
+}
+
+#square-46 {
+    grid-area: 6 / 6;
+}
+
+#square-47 {
+    grid-area: 6 / 7;
+}
+
+#square-48 {
+    grid-area: 6 / 8;
+}
+
+#square-49 {
+    grid-area: 6 / 9;
+}
+
+#square-50 {
+    grid-area: 6 / 10;
+}
+
+/* Row 5 (51-60): right to left */
+#square-51 {
+    grid-area: 5 / 10;
+}
+
+#square-52 {
+    grid-area: 5 / 9;
+}
+
+#square-53 {
+    grid-area: 5 / 8;
+}
+
+#square-54 {
+    grid-area: 5 / 7;
+}
+
+#square-55 {
+    grid-area: 5 / 6;
+}
+
+#square-56 {
+    grid-area: 5 / 5;
+}
+
+#square-57 {
+    grid-area: 5 / 4;
+}
+
+#square-58 {
+    grid-area: 5 / 3;
+}
+
+#square-59 {
+    grid-area: 5 / 2;
+}
+
+#square-60 {
+    grid-area: 5 / 1;
+}
+
+/* Row 4 (61-70): left to right */
+#square-61 {
+    grid-area: 4 / 1;
+}
+
+#square-62 {
+    grid-area: 4 / 2;
+}
+
+#square-63 {
+    grid-area: 4 / 3;
+}
+
+#square-64 {
+    grid-area: 4 / 4;
+}
+
+#square-65 {
+    grid-area: 4 / 5;
+}
+
+#square-66 {
+    grid-area: 4 / 6;
+}
+
+#square-67 {
+    grid-area: 4 / 7;
+}
+
+#square-68 {
+    grid-area: 4 / 8;
+}
+
+#square-69 {
+    grid-area: 4 / 9;
+}
+
+#square-70 {
+    grid-area: 4 / 10;
+}
+
+/* Row 3 (71-80): right to left */
+#square-71 {
+    grid-area: 3 / 10;
+}
+
+#square-72 {
+    grid-area: 3 / 9;
+}
+
+#square-73 {
+    grid-area: 3 / 8;
+}
+
+#square-74 {
+    grid-area: 3 / 7;
+}
+
+#square-75 {
+    grid-area: 3 / 6;
+}
+
+#square-76 {
+    grid-area: 3 / 5;
+}
+
+#square-77 {
+    grid-area: 3 / 4;
+}
+
+#square-78 {
+    grid-area: 3 / 3;
+}
+
+#square-79 {
+    grid-area: 3 / 2;
+}
+
+#square-80 {
+    grid-area: 3 / 1;
+}
+
+/* Row 2 (81-90): left to right */
+#square-81 {
+    grid-area: 2 / 1;
+}
+
+#square-82 {
+    grid-area: 2 / 2;
+}
+
+#square-83 {
+    grid-area: 2 / 3;
+}
+
+#square-84 {
+    grid-area: 2 / 4;
+}
+
+#square-85 {
+    grid-area: 2 / 5;
+}
+
+#square-86 {
+    grid-area: 2 / 6;
+}
+
+#square-87 {
+    grid-area: 2 / 7;
+}
+
+#square-88 {
+    grid-area: 2 / 8;
+}
+
+#square-89 {
+    grid-area: 2 / 9;
+}
+
+#square-90 {
+    grid-area: 2 / 10;
+}
+
+/* Row 1 (91-100): right to left */
+#square-91 {
+    grid-area: 1 / 10;
+}
+
+#square-92 {
+    grid-area: 1 / 9;
+}
+
+#square-93 {
+    grid-area: 1 / 8;
+}
+
+#square-94 {
+    grid-area: 1 / 7;
+}
+
+#square-95 {
+    grid-area: 1 / 6;
+}
+
+#square-96 {
+    grid-area: 1 / 5;
+}
+
+#square-97 {
+    grid-area: 1 / 4;
+}
+
+#square-98 {
+    grid-area: 1 / 3;
+}
+
+#square-99 {
+    grid-area: 1 / 2;
+}
+
+#square-100 {
+    grid-area: 1 / 1;
+}
+
+.square-number {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    font-size: 0.7rem;
+}
+
+/* CSS Pipe Container */
+#pipes-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Pipe segment styles */
+.pipe-segment {
+    position: absolute;
+    border-radius: 6px;
+    /* More rounded pipe segments */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    /* Above board but below tokens */
+}
+
+.pipe-segment.snake {
+    background-color: rgba(255, 68, 68, 0.35) !important;
+    /* 35% opacity (50% of 70%) */
+    border: 2px solid rgba(255, 68, 68, 0.45);
+    box-shadow: 0 0 8px rgba(255, 68, 68, 0.4);
+}
+
+.pipe-segment.ladder {
+    background-color: rgba(0, 206, 209, 0.35) !important;
+    /* 35% opacity (50% of 70%) */
+    border: 2px solid rgba(0, 206, 209, 0.45);
+    box-shadow: 0 0 8px rgba(0, 206, 209, 0.4);
+}
+
+/* Lane-specific styling for visual distinction */
+.pipe-segment.lane-1 {
+    opacity: 0.9;
+    filter: brightness(1.1);
+}
+
+.pipe-segment.lane-2 {
+    opacity: 0.8;
+    filter: brightness(0.95);
+}
+
+.pipe-segment.lane-3 {
+    opacity: 0.85;
+    filter: brightness(1.05);
+}
+
+.pipe-joint {
+    position: absolute;
+    border-radius: 8px;
+    /* More rounded corners instead of perfect circle */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    /* Above board but below tokens */
+}
+
+.pipe-joint.snake {
+    background-color: rgba(255, 68, 68, 0.4) !important;
+    /* 40% opacity (50% of 80%) */
+    border: 2px solid rgba(255, 68, 68, 0.5);
+    box-shadow: 0 0 8px rgba(255, 68, 68, 0.4);
+}
+
+.pipe-joint.ladder {
+    background-color: rgba(0, 206, 209, 0.4) !important;
+    /* 40% opacity (50% of 80%) */
+    border: 2px solid rgba(0, 206, 209, 0.5);
+    box-shadow: 0 0 8px rgba(0, 206, 209, 0.4);
+}
+
+/* Pipe Arrowheads */
+.pipe-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    z-index: 3;
+    /* Above pipes */
+}
+
+.pipe-arrow.snake {
+    border-left: 16px solid rgba(255, 68, 68, 0.45);
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    filter: drop-shadow(0 0 8px rgba(255, 68, 68, 0.3));
+}
+
+.pipe-arrow.ladder {
+    border-left: 16px solid rgba(0, 206, 209, 0.45);
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    filter: drop-shadow(0 0 8px rgba(0, 206, 209, 0.3));
+}
+
+/* Lane-specific styling for arrows */
+.pipe-arrow.lane-1 {
+    opacity: 0.9;
+    filter: brightness(1.1) drop-shadow(0 0 8px currentColor);
+}
+
+.pipe-arrow.lane-2 {
+    opacity: 0.8;
+    filter: brightness(0.95) drop-shadow(0 0 8px currentColor);
+}
+
+.pipe-arrow.lane-3 {
+    opacity: 0.85;
+    filter: brightness(1.05) drop-shadow(0 0 8px currentColor);
+}
+
+/* Pipe indicators for reference */
+.square.has-snake {
+    /* Visual indicator that this square has a snake */
+}
+
+.square.has-ladder {
+    /* Visual indicator that this square has a ladder */
+}
+
+.player-token {
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    position: absolute;
+    z-index: 4;
+    border: 2px solid white;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    text-align: center;
+    overflow: hidden;
+    line-height: 1;
+}
+
+.player-1 {
+    background-color: #FF6B6B;
+}
+
+.player-2 {
+    background-color: #4ECDC4;
+}
+
+.player-3 {
+    background-color: #45B7D1;
+}
+
+.player-4 {
+    background-color: #FFA726;
+}
+
+#game-controls {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1.5rem 2.5rem;
+    background-color: rgba(51, 51, 51, 0.95);
+    border-radius: 15px;
+    min-width: 320px;
+    backdrop-filter: blur(10px);
+    border: 1px solid #555;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin-top: auto;
+}
+
+#current-player {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+}
+
+#dice-display {
+    width: 70px;
+    height: 70px;
+    background-color: white;
+    color: black;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border: 2px solid #333;
+    flex-shrink: 0;
+}
+
+#game-timer {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #00CED1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Dice rolling animation */
+.dice-rolling {
+    animation: dice-roll 0.8s ease-in-out;
+    transform-style: preserve-3d;
+}
+
+@keyframes dice-roll {
+    0% {
+        transform: rotateX(0deg) rotateY(0deg) scale(1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    25% {
+        transform: rotateX(90deg) rotateY(45deg) scale(1.1);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        background-color: #f0f0f0;
+    }
+
+    50% {
+        transform: rotateX(180deg) rotateY(90deg) scale(0.9);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background-color: #e0e0e0;
+    }
+
+    75% {
+        transform: rotateX(270deg) rotateY(135deg) scale(1.1);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        background-color: #f0f0f0;
+    }
+
+    100% {
+        transform: rotateX(360deg) rotateY(180deg) scale(1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: white;
+    }
+}
+
+#win-screen {
+    text-align: center;
+    padding: 2rem;
+}
+
+#win-screen h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    color: #00CED1;
+}
+
+#winner-announcement {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background-color: #333;
+    border-radius: 10px;
+}

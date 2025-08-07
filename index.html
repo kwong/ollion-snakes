@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snakes and Ladders</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <div id="welcome-screen" class="screen active">
+            <h1>Snakes and Ladders</h1>
+            <div id="player-setup">
+                <label for="player-count">Number of Players (1-4):</label>
+                <input type="number" id="player-count" min="1" max="4" value="2">
+                <div id="player-names"></div>
+                <button id="start-game">Start Game</button>
+            </div>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div id="game-board">
+                <div id="pipes-container">
+                    <!-- Dynamic CSS pipe segments will be added here by JavaScript -->
+                </div>
+            </div>
+            <div id="game-controls">
+                <div id="current-player"></div>
+                <button id="roll-dice">Roll Dice</button>
+                <div id="dice-display"></div>
+                <div id="game-timer">Time: 00:00</div>
+            </div>
+        </div>
+
+        <div id="win-screen" class="screen">
+            <h1>Game Over!</h1>
+            <div id="winner-announcement"></div>
+            <button id="new-game">New Game</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        // Load tests for development only
+        if (window.location.search.includes('test=1')) {
+            const testScript = document.createElement('script');
+            testScript.src = 'game.test.js';
+            document.head.appendChild(testScript);
+        }
+    </script>
+</body>
+</html>
