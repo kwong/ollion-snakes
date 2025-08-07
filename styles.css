@@ -87,6 +87,84 @@ body {
     color: #00CED1;
 }
 
+#game-instructions {
+    background-color: #333;
+    border-radius: 10px;
+    margin: 0 auto 2rem auto;
+    max-width: 600px;
+    overflow: hidden;
+}
+
+#toggle-instructions {
+    width: 100%;
+    padding: 1rem 2rem;
+    background-color: #00CED1;
+    color: #000;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#toggle-instructions:hover {
+    background-color: #00B4B8;
+    transform: translateY(-2px);
+}
+
+#instructions-content {
+    padding: 2rem;
+    max-height: 400px;
+    overflow-y: auto;
+    transition: all 0.4s ease;
+}
+
+#instructions-content.instructions-hidden {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+}
+
+.instructions-section {
+    margin-bottom: 1.5rem;
+}
+
+.instructions-section:last-child {
+    margin-bottom: 0;
+}
+
+.instructions-section h3 {
+    color: #00CED1;
+    margin-bottom: 0.8rem;
+    font-size: 1.2rem;
+    border-bottom: 1px solid #555;
+    padding-bottom: 0.3rem;
+}
+
+.instructions-section p,
+.instructions-section li {
+    color: #ddd;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}
+
+.instructions-section ul {
+    margin-left: 1rem;
+    padding-left: 0;
+}
+
+.snake-color {
+    color: #FF6B6B;
+    font-weight: bold;
+}
+
+.ladder-color {
+    color: #00CED1;
+    font-weight: bold;
+}
+
 #player-setup {
     background-color: #333;
     padding: 2rem;
@@ -198,11 +276,11 @@ body {
     .player-token {
         font-size: 0.66rem;
     }
-    
+
     .square-number {
         font-size: clamp(0.42rem, 0.84vw, 0.72rem);
     }
-    
+
     .square-content {
         font-size: clamp(0.3rem, 0.66vw, 0.84rem);
     }
@@ -248,13 +326,27 @@ body {
     .player-token {
         font-size: 0.6rem;
     }
-    
+
     .square-number {
         font-size: clamp(0.36rem, 0.72vw, 0.6rem);
     }
-    
+
     .square-content {
         font-size: clamp(0.24rem, 0.6vw, 0.72rem);
+    }
+
+    #game-instructions {
+        max-width: 90vw;
+        margin: 0 auto 1.5rem auto;
+    }
+
+    #instructions-content {
+        padding: 1.5rem;
+        max-height: 300px;
+    }
+
+    .instructions-section h3 {
+        font-size: 1.1rem;
     }
 }
 
@@ -285,13 +377,32 @@ body {
     .player-token {
         font-size: 0.54rem;
     }
-    
+
     .square-number {
         font-size: clamp(0.3rem, 0.6vw, 0.48rem);
     }
-    
+
     .square-content {
         font-size: clamp(0.18rem, 0.48vw, 0.6rem);
+    }
+
+    #game-instructions {
+        max-width: 95vw;
+        margin: 0 auto 1rem auto;
+    }
+
+    #instructions-content {
+        padding: 1rem;
+        max-height: 250px;
+    }
+
+    .instructions-section h3 {
+        font-size: 1rem;
+    }
+
+    #toggle-instructions {
+        font-size: 1rem;
+        padding: 0.8rem 1.5rem;
     }
 }
 

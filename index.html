@@ -1,15 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snakes and Ladders</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div id="app">
         <div id="welcome-screen" class="screen active">
-            <h1>Snakes and Ladders</h1>
+            <h1>Cloud Ascension</h1>
+            <div id="game-instructions">
+                <button id="toggle-instructions" aria-expanded="false" aria-controls="instructions-content">Show
+                    Instructions</button>
+                <div id="instructions-content" class="instructions-hidden">
+                    <div class="instructions-section">
+                        <h3>🎯 Objective</h3>
+                        <p>Be the first player to reach square 100 to win the game!</p>
+                    </div>
+                    <div class="instructions-section">
+                        <h3>🎮 Controls</h3>
+                        <ul>
+                            <li>Click "Roll Dice" button or press <strong>Spacebar</strong> to roll</li>
+                            <li>Follow the grey directional arrows on each square</li>
+                            <li>Your token moves automatically after rolling</li>
+                        </ul>
+                    </div>
+                    <div class="instructions-section">
+                        <h3>🔧 Game Elements</h3>
+                        <ul>
+                            <li><span class="snake-color">Red pipes (Snakes)</span>: Transport you backwards - represent
+                                negative cloud outcomes</li>
+                            <li><span class="ladder-color">Teal pipes (Ladders)</span>: Transport you forwards -
+                                represent positive cloud outcomes</li>
+                            <li>Each pipe shows educational cloud adoption stories</li>
+                            <li>Square numbers are in the top-left corner</li>
+                            <li>Square 100 displays "WIN" - your goal!</li>
+                        </ul>
+                    </div>
+                    <div class="instructions-section">
+                        <h3>📋 Rules</h3>
+                        <ul>
+                            <li>Players take turns rolling a dice (1-6)</li>
+                            <li>Move along the serpentine path (left-to-right, then right-to-left)</li>
+                            <li>Landing on a pipe entrance transports you automatically</li>
+                            <li>Game timer tracks your total play time</li>
+                            <li>First to exactly reach square 100 wins!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
             <div id="player-setup">
                 <label for="player-count">Number of Players (1-4):</label>
                 <input type="number" id="player-count" min="1" max="4" value="2">
@@ -49,4 +91,5 @@
         }
     </script>
 </body>
+
 </html>

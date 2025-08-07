@@ -664,6 +664,7 @@ class SnakesAndLaddersGame {
         const rollDiceButton = document.getElementById('roll-dice');
         const newGameButton = document.getElementById('new-game');
         const playerCountInput = document.getElementById('player-count');
+        const toggleInstructionsButton = document.getElementById('toggle-instructions');
 
         if (playerCountInput) {
             playerCountInput.addEventListener('change', () => {
@@ -697,6 +698,12 @@ class SnakesAndLaddersGame {
         if (newGameButton) {
             newGameButton.addEventListener('click', () => {
                 this.resetGame();
+            });
+        }
+
+        if (toggleInstructionsButton) {
+            toggleInstructionsButton.addEventListener('click', () => {
+                this.toggleInstructions();
             });
         }
     }
@@ -928,13 +935,24 @@ class SnakesAndLaddersGame {
         const squareWidth = squareRect.width;
         const squareHeight = squareRect.height;
         
-        // Define the usable area within the square (avoiding edges)
-        const usableWidth = squareWidth * (1 - 2 * margin);
-        const usableHeight = squareHeight * (1 - 2 * margin);
+        // Define the usable area within the square (avoiding edges) - increased margin for pipe safety
+        const safeMargin = Math.max(margin, 0.35); // Minimum 35% margin for pipe containment
+        const usableWidth = squareWidth * (1 - 2 * safeMargin);
+        const usableHeight = squareHeight * (1 - 2 * safeMargin);
         
-        // Generate random position within the usable area
-        const randomX = (Math.random() * usableWidth) + (squareWidth * margin);
-        const randomY = (Math.random() * usableHeight) + (squareHeight * margin);
+        // Ensure minimum usable area
+        if (usableWidth <= 0 || usableHeight <= 0) {
+            // Fallback to center if margins are too large
+            const centerX = squareWidth / 2;
+            const centerY = squareHeight / 2;
+            const posX = squareRect.left + centerX - boardRect.left;
+            const posY = squareRect.top + centerY - boardRect.top;
+            return { x: posX, y: posY };
+        }
+        
+        // Generate random position within the safe usable area
+        const randomX = (Math.random() * usableWidth) + (squareWidth * safeMargin);
+        const randomY = (Math.random() * usableHeight) + (squareHeight * safeMargin);
         
         // Calculate position relative to the game board
         const posX = squareRect.left + randomX - boardRect.left;
@@ -944,9 +962,9 @@ class SnakesAndLaddersGame {
     }
     
     generateAndStorePipePositions(start, destination) {
-        // Generate and store consistent random positions for a pipe
-        const startPos = this.getRandomSquarePosition(start, 0.25); // 25% margin
-        const destPos = this.getRandomSquarePosition(destination, 0.25); // 25% margin
+        // Generate and store consistent random positions for a pipe with larger margins to prevent boundary crossing
+        const startPos = this.getRandomSquarePosition(start, 0.4); // 40% margin for better containment
+        const destPos = this.getRandomSquarePosition(destination, 0.4); // 40% margin for better containment
         
         if (startPos && destPos) {
             this.pipePositions.set(`${start}-start`, startPos);
@@ -991,11 +1009,16 @@ class SnakesAndLaddersGame {
         
         const pipeType = destination < start ? 'snake' : 'ladder';
         
-        // Calculate responsive lane spacing based on board size
-        const laneSpacing = Math.max(6, Math.min(18, boardWidth / 67)); // Scale between 6-18px based on board size
+        // Calculate responsive lane spacing based on board size, but limit to prevent boundary crossing
+        const maxLaneSpacing = Math.min(boardWidth / 200, 10); // Limit max spacing to prevent overflow
+        const laneSpacing = Math.max(4, maxLaneSpacing); // Scale between 4-10px based on board size
         const laneOffset = lane * laneSpacing;
+        
+        // Add vertical offset to prevent overlapping pipes + lane offset, but constrain to stay within square boundaries
+        const squareSize = boardWidth / 10; // Approximate square size
+        const maxOffset = Math.min(squareSize * 0.2, laneOffset); // Limit offset to 20% of square size
         const baseVerticalOffset = pipeType === 'snake' ? -2 : 2;
-        const verticalOffset = baseVerticalOffset + (laneOffset * (pipeType === 'snake' ? -1 : 1));
+        const verticalOffset = baseVerticalOffset + (Math.min(maxOffset, laneOffset) * (pipeType === 'snake' ? -1 : 1));
         
         const useVerticalFirst = (pipeType === 'ladder');
 
@@ -1152,13 +1175,16 @@ class SnakesAndLaddersGame {
         const pipeKey = `${start}-${destination}`;
         const lane = laneAssignments ? (laneAssignments.get(pipeKey) || 0) : 0;
         
-        // Calculate responsive lane spacing based on board size
-        const laneSpacing = Math.max(6, Math.min(18, boardWidth / 67)); // Scale between 6-18px based on board size
+        // Calculate responsive lane spacing based on board size, but limit to prevent boundary crossing
+        const maxLaneSpacing = Math.min(boardWidth / 200, 10); // Limit max spacing to prevent overflow
+        const laneSpacing = Math.max(4, maxLaneSpacing); // Scale between 4-10px based on board size
         const laneOffset = lane * laneSpacing;
         
-        // Add vertical offset to prevent overlapping pipes + lane offset
+        // Add vertical offset to prevent overlapping pipes + lane offset, but constrain to stay within square boundaries
+        const squareSize = boardWidth / 10; // Approximate square size
+        const maxOffset = Math.min(squareSize * 0.2, laneOffset); // Limit offset to 20% of square size
         const baseVerticalOffset = pipeType === 'snake' ? -2 : 2;
-        const verticalOffset = baseVerticalOffset + (laneOffset * (pipeType === 'snake' ? -1 : 1));
+        const verticalOffset = baseVerticalOffset + (Math.min(maxOffset, laneOffset) * (pipeType === 'snake' ? -1 : 1));
 
         // Different routing patterns to reduce overlaps:
         // Snakes: horizontal-first (go horizontal, then vertical)
@@ -1618,6 +1644,27 @@ class SnakesAndLaddersGame {
         const seconds = elapsedSeconds % 60;
         
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    toggleInstructions() {
+        const instructionsContent = document.getElementById('instructions-content');
+        const toggleButton = document.getElementById('toggle-instructions');
+        
+        if (!instructionsContent || !toggleButton) return;
+        
+        const isHidden = instructionsContent.classList.contains('instructions-hidden');
+        
+        if (isHidden) {
+            // Show instructions
+            instructionsContent.classList.remove('instructions-hidden');
+            toggleButton.textContent = 'Hide Instructions';
+            toggleButton.setAttribute('aria-expanded', 'true');
+        } else {
+            // Hide instructions
+            instructionsContent.classList.add('instructions-hidden');
+            toggleButton.textContent = 'Show Instructions';
+            toggleButton.setAttribute('aria-expanded', 'false');
+        }
     }
 }
 
