@@ -809,8 +809,16 @@ class SnakesAndLaddersGame {
             numberElement.textContent = square;
             squareElement.appendChild(numberElement);
 
-            // Check if this square has a story (cause or effect)
-            if (this.pipeStories.has(square)) {
+            // Check if this square has a story (cause or effect) or is the winning square
+            if (square === 100) {
+                // Special handling for the winning square
+                const contentElement = document.createElement('div');
+                contentElement.className = 'square-content win-square';
+                contentElement.textContent = 'WIN';
+                contentElement.title = 'Winning square!';
+                squareElement.appendChild(contentElement);
+                squareElement.classList.add('win-square');
+            } else if (this.pipeStories.has(square)) {
                 const story = this.pipeStories.get(square);
                 
                 // Create content element for story text
