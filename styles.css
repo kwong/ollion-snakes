@@ -419,7 +419,7 @@ body {
     min-width: 0;
     min-height: 0;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible; /* Allow arrow to show outside square bounds */
 }
 
 .square-number {
@@ -1269,6 +1269,56 @@ body {
 .player-4 {
     background-color: #FFA726;
 }
+
+/* Leader token styling - crown is added via emoji in JS */
+.player-token.leader {
+    border: 3px solid #FFD700;
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Current player indicator with text and arrow */
+.current-player-arrow {
+    position: absolute;
+    left: 50%;
+    top: -45px;
+    transform: translateX(-50%);
+    z-index: 10;
+    animation: arrow-bounce 1.5s ease-in-out infinite;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.current-player-arrow::before {
+    content: "CURRENT PLAYER";
+    font-size: 10px;
+    font-weight: bold;
+    color: #FF8C00;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+}
+
+.current-player-arrow::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 16px solid #FF8C00;
+}
+
+@keyframes arrow-bounce {
+    0%, 100% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
+
 
 #game-controls {
     position: relative;

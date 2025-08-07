@@ -8,6 +8,8 @@ class SnakesAndLaddersGame {
         this.pipePositions = new Map(); // Maps pipe keys to consistent random positions
         this.gameStartTime = null; // Track when game starts
         this.timerInterval = null; // Timer interval reference
+        this.gameActuallyStarted = false; // Track if first turn has been completed
+        this.isAnimating = false; // Track when tokens are moving
         this.positiveStatements = [];
         this.negativeStatements = [];
         this.initialize();
@@ -752,6 +754,8 @@ class SnakesAndLaddersGame {
         this.generateRandomPipes();
 
         this.setupPlayers(playerNames);
+        this.gameActuallyStarted = false; // Reset at start of new game
+        this.isAnimating = false; // Reset animation state
         this.startTimer(); // Start the game timer
         this.showScreen('game-screen');
         this.renderBoard();
@@ -1350,8 +1354,17 @@ class SnakesAndLaddersGame {
     renderPlayerTokens() {
         // Remove existing tokens that don't have data-player (old tokens)
         document.querySelectorAll('.player-token:not([data-player])').forEach(token => token.remove());
+        
+        // Remove existing current player arrows
+        document.querySelectorAll('.current-player-arrow').forEach(arrow => arrow.remove());
+
+        // Determine current leader (highest position)
+        const leaderPosition = Math.max(...this.players.map(p => p.position));
+        const leaders = this.players.filter(p => p.position === leaderPosition && p.position > 0);
+        const isMultipleLeaders = leaders.length > 1;
 
         this.players.forEach((player, index) => {
+            // Only render tokens for players who are on the board (position > 0)
             if (player.position > 0) {
                 const squareElement = document.getElementById(`square-${player.position}`);
                 if (!squareElement) return;
@@ -1366,15 +1379,31 @@ class SnakesAndLaddersGame {
                     tokenElement.dataset.player = index;
                 }
                 
+                // Reset classes for proper state management
+                tokenElement.className = `player-token player-${index + 1}`;
+                
+                // Add crown to current leader (only if there's a single leader)
+                const isLeader = player.position === leaderPosition && !isMultipleLeaders && player.position > 0;
+                if (isLeader) {
+                    tokenElement.classList.add('leader');
+                }
+                
                 // Set player name text (truncate if too long)
                 let displayName = player.name;
                 if (displayName.length > 8) {
                     displayName = displayName.substring(0, 7) + '…';
                 }
+                
+                // Add crown symbol for leader
+                if (isLeader) {
+                    displayName = '👑 ' + displayName;
+                }
+                
                 tokenElement.textContent = displayName;
 
-                // Slight offset for multiple players on same square
-                if (this.players.filter(p => p.position === player.position).length > 1) {
+                // Handle multiple players on same square
+                const playersOnSameSquare = this.players.filter(p => p.position === player.position);
+                if (playersOnSameSquare.length > 1) {
                     const offset = (index % 2) * 20 - 10;
                     tokenElement.style.left = `calc(50% + ${offset}px)`;
                 } else {
@@ -1384,6 +1413,29 @@ class SnakesAndLaddersGame {
                 squareElement.appendChild(tokenElement);
             }
         });
+        
+        // After all tokens are rendered, show arrow for current player
+        this.renderCurrentPlayerArrow();
+    }
+
+    renderCurrentPlayerArrow() {
+        // Only show arrow after the first player has completed their turn AND when not animating
+        if (!this.gameActuallyStarted || this.isAnimating) return;
+        
+        // Only show arrow for players who are on the board (position > 0)
+        if (this.players.length === 0) return;
+        
+        const currentPlayer = this.players[this.currentPlayerIndex];
+        if (!currentPlayer || currentPlayer.position === 0) return;
+        
+        // Player is on the board
+        const targetElement = document.getElementById(`square-${currentPlayer.position}`);
+        
+        if (targetElement) {
+            const arrow = document.createElement('div');
+            arrow.className = 'current-player-arrow';
+            targetElement.appendChild(arrow);
+        }
     }
 
     updateGameStatus() {
@@ -1409,6 +1461,10 @@ class SnakesAndLaddersGame {
         const diceDisplay = document.getElementById('dice-display');
         const currentPlayerIndex = this.currentPlayerIndex;
         const oldPosition = this.players[currentPlayerIndex].position;
+
+        // Start animation sequence - hide arrow
+        this.isAnimating = true;
+        this.renderPlayerTokens(); // Remove arrow immediately
 
         // Disable roll button during animation
         rollButton.disabled = true;
@@ -1470,17 +1526,24 @@ class SnakesAndLaddersGame {
         const rollButton = document.getElementById('roll-dice');
         rollButton.disabled = false;
         rollButton.textContent = 'Roll Dice';
+        
+        // End animation sequence - show arrow again
+        this.isAnimating = false;
+        this.renderPlayerTokens(); // Show arrow for new current player
     }
 
     completeTurn() {
-        this.renderPlayerTokens();
-
         const winner = this.checkWinCondition();
         if (winner) {
             this.showWinScreen(winner);
         } else {
-            this.nextTurn();
-            this.updateGameStatus();
+            this.nextTurn(); // Switch to next player first
+            // Mark game as actually started after first player completes their turn
+            if (!this.gameActuallyStarted) {
+                this.gameActuallyStarted = true;
+            }
+            this.updateGameStatus(); // Update status for new current player
+            this.renderPlayerTokens(); // Render tokens and arrow for new current player
         }
     }
 
@@ -1502,15 +1565,10 @@ class SnakesAndLaddersGame {
             token = document.createElement('div');
             token.className = `player-token player-${playerIndex + 1}`;
             token.dataset.player = playerIndex;
-            
-            // Set player name text
-            const player = this.players[playerIndex];
-            let displayName = player.name;
-            if (displayName.length > 8) {
-                displayName = displayName.substring(0, 7) + '…';
-            }
-            token.textContent = displayName;
         }
+        
+        // Update token classes and content
+        this.updateTokenAppearance(token, playerIndex);
 
         // Move token to target square - CSS transition handles the animation
         toSquare.appendChild(token);
@@ -1533,15 +1591,10 @@ class SnakesAndLaddersGame {
             token = document.createElement('div');
             token.className = `player-token player-${playerIndex + 1}`;
             token.dataset.player = playerIndex;
-            
-            // Set player name text
-            const player = this.players[playerIndex];
-            let displayName = player.name;
-            if (displayName.length > 8) {
-                displayName = displayName.substring(0, 7) + '…';
-            }
-            token.textContent = displayName;
         }
+        
+        // Update token appearance
+        this.updateTokenAppearance(token, playerIndex);
 
         // Set shorter animation duration for step-by-step movement
         token.style.transition = 'all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)';
@@ -1591,6 +1644,8 @@ class SnakesAndLaddersGame {
         // Clear all game state
         this.players = [];
         this.currentPlayerIndex = 0;
+        this.gameActuallyStarted = false; // Reset game start flag
+        this.isAnimating = false; // Reset animation state
         this.stopTimer(); // Stop the timer
 
         // Clear UI elements
@@ -1599,6 +1654,12 @@ class SnakesAndLaddersGame {
 
         // Remove all player tokens
         document.querySelectorAll('.player-token').forEach(token => token.remove());
+        
+        // Remove all starting areas
+        document.querySelectorAll('.starting-area').forEach(area => area.remove());
+        
+        // Remove all arrows
+        document.querySelectorAll('.current-player-arrow').forEach(arrow => arrow.remove());
 
         // Update status display
         this.updateGameStatus();
@@ -1644,6 +1705,37 @@ class SnakesAndLaddersGame {
         const seconds = elapsedSeconds % 60;
         
         return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    updateTokenAppearance(tokenElement, playerIndex) {
+        const player = this.players[playerIndex];
+        
+        // Reset classes
+        tokenElement.className = `player-token player-${playerIndex + 1}`;
+        
+        // Determine current leader (highest position)
+        const leaderPosition = Math.max(...this.players.map(p => p.position));
+        const leaders = this.players.filter(p => p.position === leaderPosition && p.position > 0);
+        const isMultipleLeaders = leaders.length > 1;
+        
+        // Add crown to current leader (only if there's a single leader)
+        const isLeader = player.position === leaderPosition && !isMultipleLeaders && player.position > 0;
+        if (isLeader) {
+            tokenElement.classList.add('leader');
+        }
+        
+        // Set player name text (truncate if too long)
+        let displayName = player.name;
+        if (displayName.length > 8) {
+            displayName = displayName.substring(0, 7) + '…';
+        }
+        
+        // Add crown symbol for leader
+        if (isLeader) {
+            displayName = '👑 ' + displayName;
+        }
+        
+        tokenElement.textContent = displayName;
     }
     
     toggleInstructions() {
