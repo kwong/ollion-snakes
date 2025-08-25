@@ -623,17 +623,35 @@ class SnakesAndLaddersGame {
                 <h3>${isPositive ? '🚀 Positive Outcome!' : '⚠️ Negative Consequence!'}</h3>
                 <p><strong>Cause:</strong> ${causeStory.text}</p>
                 <p><strong>Effect:</strong> ${effectStory.text}</p>
-                <button onclick="this.parentElement.parentElement.remove()" class="close-message">Continue</button>
+                <button onclick="this.parentElement.parentElement.remove()" class="close-message">Continue (Press Spacebar)</button>
             </div>
         `;
 
         document.body.appendChild(messageDiv);
 
-        // Auto-remove after 5 seconds if not manually closed
-        setTimeout(() => {
+        // Close dialog function
+        const closeDialog = () => {
             if (messageDiv.parentElement) {
                 messageDiv.remove();
+                document.removeEventListener('keydown', spacebarHandler);
             }
+        };
+
+        // Spacebar event handler
+        const spacebarHandler = (event) => {
+            if (event.code === 'Space' || event.key === ' ') {
+                event.preventDefault();
+                event.stopPropagation(); // Prevent dice roll from triggering
+                closeDialog();
+            }
+        };
+
+        // Add spacebar listener
+        document.addEventListener('keydown', spacebarHandler);
+
+        // Auto-remove after 5 seconds if not manually closed
+        setTimeout(() => {
+            closeDialog();
         }, 5000);
     }
 
@@ -693,6 +711,9 @@ class SnakesAndLaddersGame {
                 this.updatePlayerNameInputs();
             });
         }
+        
+        // Add click handlers for custom number input arrows
+        this.setupCustomNumberInput();
 
         if (startButton) {
             startButton.addEventListener('click', () => {
@@ -709,6 +730,17 @@ class SnakesAndLaddersGame {
         // Add spacebar support for rolling dice
         document.addEventListener('keydown', (event) => {
             if (event.code === 'Space' && document.getElementById('game-screen').classList.contains('active')) {
+                // Don't handle spacebar if user is typing in a text input
+                const activeElement = document.activeElement;
+                if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                    return; // Let the user type spaces in text inputs
+                }
+                
+                // Don't roll dice if there's an active educational message dialog
+                if (document.querySelector('.educational-message')) {
+                    return; // Let the dialog handler deal with it
+                }
+                
                 event.preventDefault(); // Prevent page scrolling
                 const rollButton = document.getElementById('roll-dice');
                 if (rollButton && !rollButton.disabled) {
@@ -734,6 +766,9 @@ class SnakesAndLaddersGame {
         // Ensure welcome screen is explicitly active
         this.showScreen('welcome-screen');
 
+        // Create custom number input with arrows
+        this.createCustomNumberInput();
+
         // Update player name inputs for welcome screen
         this.updatePlayerNameInputs();
 
@@ -744,9 +779,76 @@ class SnakesAndLaddersGame {
         setTimeout(() => this.drawPipes(), 100);
     }
 
+    createCustomNumberInput() {
+        const playerCountInput = document.getElementById('player-count');
+        if (!playerCountInput || playerCountInput.dataset.customized === 'true') return;
+
+        // Mark as customized to prevent double-processing
+        playerCountInput.dataset.customized = 'true';
+
+        // Create wrapper for custom number input
+        const wrapper = document.createElement('div');
+        wrapper.className = 'number-input-wrapper';
+
+        // Wrap the existing input
+        playerCountInput.parentNode.insertBefore(wrapper, playerCountInput);
+        wrapper.appendChild(playerCountInput);
+
+        // Create increase arrow (right side)
+        const upArrow = document.createElement('button');
+        upArrow.type = 'button';
+        upArrow.className = 'number-input-arrow up';
+        upArrow.innerHTML = '▶';
+        upArrow.setAttribute('aria-label', 'Increase number of players');
+
+        // Create decrease arrow (left side)
+        const downArrow = document.createElement('button');
+        downArrow.type = 'button';
+        downArrow.className = 'number-input-arrow down';
+        downArrow.innerHTML = '◀';
+        downArrow.setAttribute('aria-label', 'Decrease number of players');
+
+        // Add arrows to wrapper
+        wrapper.appendChild(upArrow);
+        wrapper.appendChild(downArrow);
+    }
+
+    setupCustomNumberInput() {
+        // Add click handlers for the custom arrows
+        document.addEventListener('click', (event) => {
+            if (event.target.classList.contains('number-input-arrow')) {
+                const playerCountInput = document.getElementById('player-count');
+                if (!playerCountInput) return;
+
+                const currentValue = parseInt(playerCountInput.value);
+                const min = parseInt(playerCountInput.min) || 1;
+                const max = parseInt(playerCountInput.max) || 4;
+
+                if (event.target.classList.contains('up')) {
+                    if (currentValue < max) {
+                        playerCountInput.value = currentValue + 1;
+                        playerCountInput.dispatchEvent(new Event('change'));
+                    }
+                } else if (event.target.classList.contains('down')) {
+                    if (currentValue > min) {
+                        playerCountInput.value = currentValue - 1;
+                        playerCountInput.dispatchEvent(new Event('change'));
+                    }
+                }
+            }
+        });
+    }
+
     updatePlayerNameInputs() {
         const playerCount = parseInt(document.getElementById('player-count').value);
         const playerNamesContainer = document.getElementById('player-names');
+
+        // Store existing values before clearing
+        const existingValues = [];
+        const existingInputs = playerNamesContainer.querySelectorAll('.player-name-input');
+        existingInputs.forEach((input, index) => {
+            existingValues[index] = input.value;
+        });
 
         playerNamesContainer.innerHTML = '';
 
@@ -755,7 +857,14 @@ class SnakesAndLaddersGame {
             input.type = 'text';
             input.className = 'player-name-input';
             input.placeholder = `Player ${i} Name`;
-            input.value = `Player ${i}`;
+            
+            // Preserve existing value if available, otherwise use default
+            if (existingValues[i - 1] && existingValues[i - 1].trim() !== '') {
+                input.value = existingValues[i - 1];
+            } else {
+                input.value = `Player ${i}`;
+            }
+            
             input.id = `player-${i}-name`;
             playerNamesContainer.appendChild(input);
         }
@@ -770,21 +879,52 @@ class SnakesAndLaddersGame {
             playerNames.push(name);
         }
 
-        // Generate new random pipes for this game
-        this.generateRandomPipes();
+        // Start countdown before beginning the game
+        this.startGameCountdown(() => {
+            // This callback runs after the countdown completes
+            // Generate new random pipes for this game
+            this.generateRandomPipes();
 
-        this.setupPlayers(playerNames);
-        this.gameActuallyStarted = false; // Reset at start of new game
-        this.isAnimating = false; // Reset animation state
-        this.startTimer(); // Start the game timer
-        this.showScreen('game-screen');
-        this.renderBoard();
-        this.updateGameStatus();
+            this.setupPlayers(playerNames);
+            this.gameActuallyStarted = false; // Reset at start of new game
+            this.isAnimating = false; // Reset animation state
+            this.startTimer(); // Start the game timer
+            this.showScreen('game-screen');
+            this.renderBoard();
+            this.updateGameStatus();
 
-        // Draw pipes after DOM is ready
-        setTimeout(() => {
-            this.drawPipes();
-        }, 200);
+            // Draw pipes after DOM is ready
+            setTimeout(() => {
+                this.drawPipes();
+            }, 200);
+        });
+    }
+
+    startGameCountdown(callback) {
+        const startButton = document.getElementById('start-game');
+        const originalText = startButton.textContent;
+        let countdown = 3;
+
+        // Disable button during countdown
+        startButton.disabled = true;
+        startButton.style.cursor = 'not-allowed';
+        
+        const countdownInterval = setInterval(() => {
+            startButton.textContent = `Starting in ${countdown}...`;
+            countdown--;
+
+            if (countdown < 0) {
+                clearInterval(countdownInterval);
+                
+                // Restore button state
+                startButton.textContent = originalText;
+                startButton.disabled = false;
+                startButton.style.cursor = 'pointer';
+                
+                // Execute the callback to start the game
+                callback();
+            }
+        }, 1000);
     }
 
     showScreen(screenId) {
